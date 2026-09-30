@@ -1,0 +1,16 @@
+{% extends 'admin/base.html' %}
+{% from 'admin/_reservas.html' import tabela_reservas with context %}
+{% block titulo %}Agenda{% endblock %}
+{% block conteudo %}
+<div class="admin-titulo">
+  <div><span class="eyebrow">Agenda</span><h1 class="titulo" style="font-size:40px">{{ dia|data_longa|capitalize }}</h1></div>
+  <form class="acoes" method="get" action="{{ url_for('admin.agenda') }}" style="align-items:center">
+    <a class="btn btn--p btn--contorno" href="{{ url_for('admin.agenda', data=anterior.isoformat()) }}">{{ m.icone('voltar') }}Anterior</a>
+    <div class="campo" style="flex-direction:row"><input type="date" name="data" value="{{ dia.isoformat() }}" aria-label="Data" style="min-height:44px"></div>
+    <button class="btn btn--p btn--contorno" type="submit">Ir</button>
+    <a class="btn btn--p btn--contorno" href="{{ url_for('admin.agenda', data=proximo.isoformat()) }}">Próximo{{ m.icone('seta') }}</a>
+  </form>
+</div>
+{% if rows %}{{ tabela_reservas(rows, url_for('admin.agenda', data=dia.isoformat())) }}
+{% else %}<div class="cartao vazio"><p>Nenhuma reserva neste dia.</p></div>{% endif %}
+{% endblock %}

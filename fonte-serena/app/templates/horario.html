@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% from '_seletor.html' import seletor with context %}
+{% block titulo %}Agendar {{ e.nome }}{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container">
+    <a class="link-seta" href="{{ url_for('reservas.agendar') }}">{{ m.icone('voltar') }}Trocar experiência</a>
+    <div class="intro" style="margin-top:24px">
+      <span class="eyebrow">Agendar</span>
+      <h1 class="titulo">{{ e.nome }}</h1>
+    </div>
+    {{ m.etapas(2) }}
+
+    <div class="reserva-grid">
+      <div>
+        {% if dias %}
+          {{ seletor('reservas.horario', {'slug': e.slug}, dias, dia, horarios, escolhido) }}
+        {% else %}
+          <div class="cartao vazio">
+            <div class="vazio__icone">{{ m.icone('calendario') }}</div>
+            <h2 class="titulo-m">A agenda está cheia por enquanto</h2>
+            <p>Não há horários livres nos próximos {{ cfg.janela }} dias para esta experiência. Fale com a gente para entrar na lista de espera.</p>
+            {% if wa_link %}<a class="btn" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Chamar no WhatsApp</a>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <aside class="cartao resumo" id="confirmar">
+        <h2 class="titulo-p">Resumo da reserva</h2>
+        <div class="resumo__linha"><span>Experiência</span><span>{{ e.nome }}</span></div>
+        <div class="resumo__linha"><span>Duração</span><span>{{ e.duracao_min|duracao }}</span></div>
+        <div class="resumo__linha"><span>Data</span><span>{{ (escolhido|data_longa) if escolhido else '—' }}</span></div>
+        <div class="resumo__linha"><span>Horário</span><span>{{ escolhido.strftime('%H:%M') if escolhido else '—' }}</span></div>
+        <div class="sep"></div>
+        <div class="resumo__linha"><span>Valor total</span><span>{{ e.preco_centavos|reais }}</span></div>
+        <div class="resumo__linha resumo__linha--forte"><span>Sinal agora (50%)</span><span>{{ sinal|reais }}</span></div>
+        <div class="resumo__linha"><span>No dia do atendimento</span><span>{{ (e.preco_centavos - sinal)|reais }}</span></div>
+        {% if escolhido %}
+          {% if user %}
+            <form method="post" action="{{ url_for('reservas.reservar', slug=e.slug) }}">
+              <input type="hidden" name="csrf" value="{{ csrf_token }}">
+              <input type="hidden" name="data" value="{{ escolhido.strftime('%Y-%m-%d') }}">
+              <input type="hidden" name="hora" value="{{ escolhido.strftime('%H:%M') }}">
+              <button class="btn btn--bloco" type="submit">Reservar e pagar o sinal{{ m.icone('seta') }}</button>
+            </form>
+          {% else %}
+            <a class="btn btn--bloco" href="{{ url_for('conta.entrar', next=request.full_path) }}">Entrar para reservar{{ m.icone('seta') }}</a>
+            <p class="muted pequeno">Leva menos de um minuto. Sua escolha fica guardada.</p>
+          {% endif %}
+          <p class="muted pequeno">Seu horário fica guardado por {{ cfg.bloqueio }} minutos enquanto você paga o Pix.</p>
+        {% else %}
+          <button class="btn btn--bloco" type="button" disabled>Escolha um horário</button>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

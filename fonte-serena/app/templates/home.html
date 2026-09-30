@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block capa_class %}sobre-capa{% endblock %}
+{% block conteudo %}
+
+{# ---------- Capa ---------- #}
+<section class="capa" aria-label="Apresentação">
+  <div class="capa__fotos" aria-hidden="true">
+    {{ m.foto(foto_site('hero_imagem'), eager=True) }}
+    {{ m.foto(url_for('static', filename='img/fotos/jardim.jpg'), eager=True) }}
+    {{ m.foto(url_for('static', filename='img/fotos/hidromassagem.jpg'), eager=True) }}
+  </div>
+  <div class="capa__conteudo">
+    <span class="eyebrow">Head Spa · {{ S.cidade or 'Patos de Minas/MG' }}</span>
+    <h1>Seu corpo pede uma pausa. <em>Sua mente também.</em></h1>
+    <p>Rituais de cuidado para a cabeça, o couro cabeludo e o corpo — em silêncio, com tempo e com as mãos certas.</p>
+    <div class="acoes" style="justify-content:center">
+      <a class="btn btn--claro btn--g" href="{{ url_for('reservas.agendar') }}">Agendar horário</a>
+      <a class="btn btn--vidro btn--g" href="{{ url_for('public.descubra') }}">Descobrir meu momento</a>
+    </div>
+  </div>
+  <a class="capa__rolar" href="#manifesto">Role<i></i></a>
+</section>
+
+{# ---------- Manifesto ---------- #}
+<section class="manifesto" id="manifesto">
+  <div class="container">
+    <span class="rotulo-sec" data-revelar>Fonte Serena</span>
+    <p class="manifesto__texto" data-revelar style="--atraso:.1s">Um espaço de silêncio no meio da semana. Aqui o tempo corre mais devagar — <em>água morna, aromas escolhidos com calma</em>, mãos atentas e nenhuma pressa para terminar.</p>
+  </div>
+</section>
+<div class="faixa" aria-hidden="true">
+  <div class="faixa__trilho">
+    {% for _ in range(2) %}<span>Head Spa</span><span>Massagens</span><span>Hidromassagem</span><span>Sauna</span><span>Escalda-pés</span><span>Day Spa</span>{% endfor %}
+  </div>
+</div>
+
+{# ---------- O ritual ---------- #}
+{% set etapas_ritual = [
+  ('I', 'Chegada', 'Você entra e respira. O jardim interno e a luz natural marcam o começo da pausa — o celular pode ficar para depois.', 'jardim.jpg', 'Corredor com jardim interno e sofá, iluminado por claraboia'),
+  ('II', 'Preparação', 'Roupão macio, sala preparada antes de você chegar e tempo para desacelerar antes do cuidado começar.', 'roupoes.jpg', 'Duas clientes de roupão branco antes do atendimento'),
+  ('III', 'Head Spa', 'Água morna, limpeza e massagem no couro cabeludo, com aromas escolhidos com calma. É aqui que a mente silencia.', 'head-spa.jpg', 'Cliente recebendo Head Spa no lavatório'),
+  ('IV', 'Imersão', 'Para quem quer estender o momento: hidromassagem, sauna e escalda-pés combinados em sequência.', 'hidromassagem.jpg', 'Hidromassagem com espumante e bandeja de madeira'),
+] %}
+<section class="ritual" id="ritual" aria-labelledby="ritual-titulo">
+  <div class="container ritual__grade">
+    <div class="ritual__fotos" aria-hidden="true">
+      {% for n, t, d, img, alt in etapas_ritual %}
+        <div class="foto {% if loop.first %}ativa{% endif %}" data-ritual-foto="{{ loop.index0 }}"><img src="{{ url_for('static', filename='img/fotos/' ~ img) }}" alt="" loading="lazy" style="object-position: {{ foto_pos(img) }}"></div>
+      {% endfor %}
+      <span class="ritual__contador" data-ritual-contador>I — IV</span>
+    </div>
+    <div>
+      <div class="ritual__abertura">
+        <span class="rotulo-sec" data-revelar>O ritual</span>
+        <h2 class="titulo" id="ritual-titulo" data-revelar style="--atraso:.1s">Uma pausa em <em>quatro tempos</em></h2>
+        <p class="lead" data-revelar style="--atraso:.2s">Cada visita segue um ritmo pensado para desligar o corpo aos poucos. Você escolhe até onde quer ir.</p>
+      </div>
+      {% for n, t, d, img, alt in etapas_ritual %}
+        <article class="etapa-ritual {% if loop.first %}ativa{% endif %}" data-ritual-etapa="{{ loop.index0 }}" data-numero="{{ n }}">
+          {{ m.foto(url_for('static', filename='img/fotos/' ~ img), alt=alt) }}
+          <span class="etapa-ritual__n">{{ n }}.</span>
+          <h3>{{ t }}</h3>
+          <p>{{ d }}</p>
+        </article>
+      {% endfor %}
+      <a class="link-linha" href="{{ url_for('reservas.agendar') }}" style="margin-top:24px">Reservar o meu ritual{{ m.icone('seta') }}</a>
+    </div>
+  </div>
+</section>
+
+{# ---------- Destaque ---------- #}
+{% if destaque %}
+<section class="destaque-full" aria-labelledby="destaque-titulo">
+  {{ m.foto(foto_exp(destaque), alt=destaque.nome) }}
+  <div class="destaque-full__texto">
+    <span class="rotulo-sec" data-revelar>A experiência completa</span>
+    <h2 class="titulo" id="destaque-titulo" data-revelar style="--atraso:.1s">{{ destaque.nome }}</h2>
+    {% if destaque.descricao or destaque.resumo %}<p class="lead" data-revelar style="--atraso:.2s">{{ destaque.descricao or destaque.resumo }}</p>{% endif %}
+    {% if destaque.inclui %}
+      <ul class="inclui" data-revelar style="--atraso:.25s">
+        {% for item in destaque.inclui.splitlines() if item.strip() %}<li>{{ m.icone('check') }}{{ item }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% if reservavel(destaque) %}
+      <div class="metricas" data-revelar style="--atraso:.3s">
+        <div><small>Duração</small><strong>{{ destaque.duracao_min|duracao }}</strong></div>
+        <div><small>Valor</small><strong>{{ destaque.preco_centavos|reais }}</strong></div>
+        <div><small>Sinal (50%)</small><strong>{{ ((destaque.preco_centavos + 1) // 2)|reais }}</strong></div>
+      </div>
+      <div class="acoes" data-revelar style="--atraso:.35s">
+        <a class="btn btn--g" href="{{ url_for('reservas.horario', slug=destaque.slug) }}">Reservar esta experiência</a>
+        <a class="link-linha" href="{{ url_for('public.experiencia', slug=destaque.slug) }}">Ver detalhes</a>
+      </div>
+    {% else %}
+      <a class="btn btn--contorno" style="align-self:flex-start" href="{{ url_for('public.experiencia', slug=destaque.slug) }}">Ver detalhes</a>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{# ---------- Cardápio ---------- #}
+<section class="secao" id="experiencias" aria-labelledby="cardapio-titulo">
+  <div class="container">
+    <div class="cardapio__topo">
+      <div class="intro">
+        <span class="rotulo-sec" data-revelar>Experiências</span>
+        <h2 class="titulo" id="cardapio-titulo" data-revelar style="--atraso:.1s">Escolha o seu <em>momento</em></h2>
+      </div>
+      <a class="link-linha" href="{{ url_for('public.experiencias') }}" data-revelar>Ver cardápio completo{{ m.icone('seta') }}</a>
+    </div>
+    {% set cats_presentes = outras|map(attribute='categoria')|unique|list %}
+    {% if cats_presentes|length > 1 %}
+    <div class="abas-cat" role="tablist" aria-label="Filtrar por categoria" data-filtro>
+      <button type="button" role="tab" aria-selected="true" data-cat="">Todas</button>
+      {% for chave, nome in CATEGORIAS.items() if chave in cats_presentes %}
+        <button type="button" role="tab" aria-selected="false" data-cat="{{ chave }}">{{ nome }}</button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if outras %}
+      <div class="grade grade--{{ 4 if outras|length % 4 == 0 else 3 }}" data-filtro-alvo>
+        {% for e in outras %}{{ m.cartao_experiencia(e, (loop.index0 % 3) * 0.1) }}{% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{# ---------- Descubra seu momento ---------- #}
+<section class="secao secao--areia" id="descubra" aria-labelledby="descubra-titulo">
+  <div class="container descubra-home">
+    <div class="intro">
+      <span class="rotulo-sec" data-revelar>Descubra seu momento</span>
+      <h2 class="titulo" id="descubra-titulo" data-revelar style="--atraso:.1s">Como você está se sentindo <em>hoje?</em></h2>
+      <p class="lead" data-revelar style="--atraso:.2s">Escolha o que mais se parece com o seu dia. A gente sugere a experiência com cuidado — sem diagnóstico e sem pressa.</p>
+      <span class="muted pequeno" data-revelar style="--atraso:.25s">6 perguntas rápidas e opcionais · não precisa de cadastro</span>
+    </div>
+    <nav class="lista-sentir" aria-label="Como você está se sentindo">
+      {% for valor, rotulo, _ in sentimentos %}
+        <a href="{{ url_for('public.descubra', sentimento=valor) }}" data-revelar style="--atraso: {{ loop.index0 * 0.05 }}s"><span>{{ rotulo }}</span>{{ m.icone('seta') }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+</section>
+
+{# ---------- Como funciona ---------- #}
+<section class="secao" id="como-funciona" aria-labelledby="como-titulo">
+  <div class="container">
+    <div class="intro">
+      <span class="rotulo-sec" data-revelar>Como funciona a reserva</span>
+      <h2 class="titulo" id="como-titulo" data-revelar style="--atraso:.1s">Reserve em poucos minutos</h2>
+      <p class="lead" data-revelar style="--atraso:.2s">O sinal de 50% garante o seu horário. O restante você paga no dia, direto no espaço.</p>
+    </div>
+    <div class="passos">
+      <div class="passo" data-revelar><span class="passo__n">01</span><h3 class="titulo-p">Escolha a experiência</h3><p>Veja o que inclui, a duração e o valor antes de decidir.</p></div>
+      <div class="passo" data-revelar style="--atraso:.1s"><span class="passo__n">02</span><h3 class="titulo-p">Escolha dia e horário</h3><p>Os horários livres aparecem na hora. {{ horario_texto() }}.</p></div>
+      <div class="passo" data-revelar style="--atraso:.2s"><span class="passo__n">03</span><h3 class="titulo-p">Pague o sinal no Pix</h3><p>Copia e Cola ou QR Code. O horário fica guardado por {{ S.bloqueio_min or 15 }} minutos enquanto você paga.</p></div>
+      <div class="passo" data-revelar style="--atraso:.3s"><span class="passo__n">04</span><h3 class="titulo-p">Receba a confirmação</h3><p>Assim que o Pix é conferido, sua reserva é confirmada. O restante é pago no dia.</p></div>
+    </div>
+    <div class="notas">
+      <div class="nota" data-revelar>{{ m.icone('remarcar') }}<div><strong>Precisa mudar o horário?</strong><span>Remarque em Meus agendamentos até {{ S.remarcar_horas or 8 }} horas antes, sem pagar o sinal de novo.</span></div></div>
+      <div class="nota" data-revelar style="--atraso:.1s">{{ m.icone('escudo') }}<div><strong>Seus dados protegidos</strong><span>Cada cliente vê apenas as próprias reservas e pagamentos.{% if S.politicas %} <a href="{{ url_for('public.politicas') }}">Ler políticas de cancelamento</a>{% endif %}</span></div></div>
+    </div>
+  </div>
+</section>
+
+{# ---------- Dúvidas ---------- #}
+<section class="secao secao--papel" id="duvidas" aria-labelledby="duvidas-titulo">
+  <div class="container faq">
+    <div style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">
+      <span class="rotulo-sec" data-revelar>Dúvidas frequentes</span>
+      <h2 class="titulo" id="duvidas-titulo" data-revelar style="--atraso:.1s">Antes de <em>reservar</em></h2>
+      <p class="lead" data-revelar style="--atraso:.2s">Não encontrou sua resposta? Fale com a gente.</p>
+      {% if wa_link %}<a class="btn btn--contorno" href="{{ wa_link }}" target="_blank" rel="noopener" data-revelar style="--atraso:.25s">{{ m.icone('whatsapp') }}Chamar no WhatsApp</a>
+      {% else %}<a class="btn btn--contorno" href="{{ url_for('public.contato') }}">Ver contato</a>{% endif %}
+    </div>
+    <div class="faq__lista" data-revelar>
+      <details open><summary>Como funciona o sinal de 50%?</summary><p>O sinal garante o seu horário e corresponde à metade do valor da experiência. Você paga por Pix na hora da reserva e o restante no dia do atendimento, direto no espaço.</p></details>
+      <details><summary>Preciso criar conta para ver preços?</summary><p>Não. Preços, experiências e o questionário ficam abertos para todo mundo. A conta só é pedida na hora de reservar, para você acompanhar e remarcar seus horários.</p></details>
+      <details><summary>Quanto tempo leva para confirmar o Pix?</summary><p>Depois de pagar, toque em "Já paguei". A equipe confere o recebimento durante o horário de atendimento e sua reserva aparece como confirmada em Meus agendamentos.</p></details>
+      <details><summary>Posso remarcar meu horário?</summary><p>Sim. Em Meus agendamentos você remarca sozinha até {{ S.remarcar_horas or 8 }} horas antes, sem pagar o sinal de novo.</p></details>
+      <details><summary>E se eu precisar cancelar?</summary><p>{% if S.politicas %}As regras de cancelamento e reembolso estão nas <a href="{{ url_for('public.politicas') }}">políticas</a>.{% else %}Fale com a gente pelo WhatsApp para combinarmos a melhor solução.{% endif %}</p></details>
+      <details><summary>Quais horários estão disponíveis?</summary><p>{{ horario_texto() }}, no horário de Brasília. Os horários livres aparecem na tela de agendamento.</p></details>
+      <details><summary>Vocês atendem crianças?</summary><p>Sim, temos experiências pensadas para crianças. No questionário, escolha "Estou escolhendo para uma criança" para ver as sugestões.</p></details>
+    </div>
+  </div>
+</section>
+
+{# ---------- Visite ---------- #}
+<section class="visite" id="visite" aria-labelledby="visite-titulo">
+  {{ m.foto(url_for('static', filename='img/fotos/sala.jpg'), alt='Sala de atendimento com a porta aberta para o jardim') }}
+  {{ m.foto(foto_site('sobre_imagem'), alt='Jardim interno da Fonte Serena') }}
+  <div class="visite__cartao" data-revelar>
+    <span class="rotulo-sec">Visite</span>
+    <h2 class="titulo-m" id="visite-titulo" style="font-size:clamp(32px,3.4vw,46px)">Sua pausa começa aqui</h2>
+    <div class="info">
+      <div>{{ m.icone('pino') }}<span>{% if S.endereco %}{{ S.endereco }} · {% endif %}{{ S.cidade }}</span></div>
+      <div>{{ m.icone('relogio') }}<span>{{ horario_texto() }}</span></div>
+      {% if wa_link %}<div>{{ m.icone('whatsapp') }}<a href="{{ wa_link }}" target="_blank" rel="noopener">{{ S.whatsapp }}</a></div>{% endif %}
+    </div>
+    <div class="acoes" style="justify-content:center">
+      <a class="btn" href="{{ url_for('reservas.agendar') }}">Agendar horário</a>
+      {% if mapa_link() %}<a class="btn btn--contorno" href="{{ mapa_link() }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

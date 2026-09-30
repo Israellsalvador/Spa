@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% block titulo %}{{ 'Criar conta' if aba == 'cadastro' else 'Entrar' }}{% endblock %}
+{% block conteudo %}
+<section>
+  <div>
+    <div class="auth">
+      <div class="auth__form">
+        <span class="eyebrow">Minha conta</span>
+        <h1 class="titulo" style="font-size:clamp(38px,4.4vw,58px)">{{ 'Crie sua conta' if aba == 'cadastro' else 'Entre na sua conta' }}</h1>
+        <p class="muted">Você só precisa de conta para reservar e acompanhar seus horários. Ver preços e responder ao questionário não exige cadastro.</p>
+        <div class="segmentado">
+          <a href="{{ url_for('conta.entrar', next=nxt) }}" aria-current="{{ 'true' if aba != 'cadastro' else 'false' }}">Já tenho conta</a>
+          <a href="{{ url_for('conta.entrar', aba='cadastro', next=nxt) }}" aria-current="{{ 'true' if aba == 'cadastro' else 'false' }}">Criar conta</a>
+        </div>
+        <form class="form" method="post" action="{{ url_for('conta.entrar') }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token }}">
+          <input type="hidden" name="next" value="{{ nxt }}">
+          <input type="hidden" name="aba" value="{{ aba }}">
+          {% if aba == 'cadastro' %}
+            <div class="campo"><label for="nome">Nome</label><input id="nome" name="nome" autocomplete="name" required value="{{ form.nome or '' }}"></div>
+            <div class="campo"><label for="telefone">WhatsApp</label><input id="telefone" name="telefone" type="tel" autocomplete="tel" placeholder="(34) 90000-0000" value="{{ form.telefone or '' }}"><small>Usamos só para falar sobre a sua reserva.</small></div>
+          {% endif %}
+          <div class="campo"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="voce@email.com" value="{{ form.email or '' }}"></div>
+          <div class="campo">
+            <label for="senha">Senha</label>
+            <input id="senha" name="senha" type="password" required minlength="{{ 8 if aba == 'cadastro' else 1 }}" autocomplete="{{ 'new-password' if aba == 'cadastro' else 'current-password' }}">
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <small>{% if aba == 'cadastro' %}Mínimo de 8 caracteres.{% endif %}</small>
+              {% if aba != 'cadastro' %}<a class="pequeno" href="{{ url_for('conta.esqueci') }}" style="font-weight:600">Esqueci minha senha</a>{% endif %}
+            </div>
+          </div>
+          <button class="btn btn--bloco" type="submit">{{ 'Criar conta e continuar' if aba == 'cadastro' else 'Entrar' }}</button>
+        </form>
+        <p class="muted pequeno">Não usamos sua conta para marketing e não pedimos CPF.{% if S.politicas %} <a href="{{ url_for('public.politicas') }}">Ler políticas</a>{% endif %}</p>
+      </div>
+      <div class="auth__lado">
+        {{ m.foto(foto_site('entrar'), alt='Clientes de roupão na Fonte Serena') }}
+        <span class="eyebrow" style="color:var(--ouro)">Minha conta</span>
+        <h2 class="titulo-m">Com a sua conta você pode</h2>
+        <ul class="lista-check">
+          <li>{{ m.icone('check') }}<span>Acompanhar suas reservas e o pagamento do sinal</span></li>
+          <li>{{ m.icone('check') }}<span>Remarcar sozinha até {{ S.remarcar_horas or 8 }} horas antes</span></li>
+          <li>{{ m.icone('check') }}<span>Ver o histórico dos seus atendimentos</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

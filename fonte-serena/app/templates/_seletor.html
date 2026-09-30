@@ -1,0 +1,26 @@
+{% macro seletor(endpoint, params, dias, dia, horarios, escolhido) -%}
+<div class="bloco">
+  <h2 class="titulo-m">Escolha o dia</h2>
+  {% if dias %}
+  <div class="dias" role="list">
+    {% for d in dias %}
+      <a class="dia" role="listitem" href="{{ url_for(endpoint, data=d.isoformat(), **params) }}#horarios" aria-current="{{ 'true' if d == dia else 'false' }}">
+        <small>{{ ['SEG','TER','QUA','QUI','SEX','SÁB','DOM'][d.weekday()] }}</small>
+        <strong>{{ d.day }}</strong>
+        <span>{{ ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][d.month - 1] }}</span>
+      </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% if dia %}
+<div class="bloco" id="horarios">
+  <h2 class="titulo-m">Horários livres · {{ dia|data_longa }}</h2>
+  <div class="horas">
+    {% for h in horarios %}
+      <a class="hora" href="{{ url_for(endpoint, data=dia.isoformat(), hora=h.strftime('%H:%M'), **params) }}#confirmar" aria-current="{{ 'true' if escolhido and h == escolhido else 'false' }}">{{ h.strftime('%H:%M') }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{%- endmacro %}

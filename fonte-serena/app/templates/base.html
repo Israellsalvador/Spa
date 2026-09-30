@@ -1,0 +1,126 @@
+{% import '_macros.html' as m with context %}<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block titulo %}{% endblock %}{% if self.titulo() %} · {% endif %}Fonte Serena — Head Spa em Patos de Minas</title>
+<meta name="description" content="{% block descricao %}Head Spa, massagens e day spa em Patos de Minas/MG. Seu corpo pede uma pausa. Sua mente também. Reserve pelo site com sinal de 50% via Pix.{% endblock %}">
+<meta name="theme-color" content="#16120F">
+<meta property="og:title" content="Fonte Serena — Head Spa">
+<meta property="og:description" content="Seu corpo pede uma pausa. Sua mente também. Head Spa, massagens e day spa em Patos de Minas/MG.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="{{ url_for('static', filename='img/fotos/head-spa.jpg', _external=True) }}">
+<link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+<link rel="preload" href="{{ url_for('static', filename='fonts/figtree-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ url_for('static', filename='fonts/newsreader-latin-standard-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}?v=5">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+{% set pagina = request.endpoint or '' %}
+<body class="{% block body_class %}tem-barra{% endblock %} {% block capa_class %}{% endblock %}">
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <div class="container topo__barra">
+    <nav class="menu" aria-label="Principal">
+      <a href="{{ url_for('public.experiencias') }}" {% if pagina.startswith('public.experiencia') %}aria-current="page"{% endif %}>Experiências</a>
+      <a href="{{ url_for('public.descubra') }}" {% if pagina in ('public.descubra', 'public.resultado') %}aria-current="page"{% endif %}>Descubra seu momento</a>
+      <a href="{{ url_for('public.contato') }}" {% if pagina == 'public.contato' %}aria-current="page"{% endif %}>Contato</a>
+    </nav>
+    <a class="marca" href="{{ url_for('public.home') }}" aria-label="Fonte Serena — Início">
+      {{ m.icone('ondas') }}
+      <span class="marca__nome"><strong>Fonte Serena</strong><small>HEAD SPA</small></span>
+    </a>
+    <div class="topo__acoes">
+      {% if user %}
+        <details class="conta-menu">
+          <summary>{{ m.icone('pessoa') }}{{ user.nome.split()[0] }}{{ m.icone('baixo') }}</summary>
+          <div class="conta-menu__painel">
+            {% if user.is_admin %}<a href="{{ url_for('admin.painel') }}">Painel da administração</a>{% endif %}
+            <a href="{{ url_for('conta.meus_agendamentos') }}">Meus agendamentos</a>
+            <form method="post" action="{{ url_for('conta.sair') }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button type="submit">Sair</button></form>
+          </div>
+        </details>
+      {% else %}
+        <a class="conta-link" href="{{ url_for('conta.entrar') }}">{{ m.icone('pessoa') }}Entrar</a>
+      {% endif %}
+      <a class="btn btn--p" href="{{ url_for('reservas.agendar') }}">Agendar</a>
+      <details class="menu-mobile">
+        <summary aria-label="Abrir menu">{{ m.icone('menu') }}</summary>
+        <nav class="menu-mobile__painel" aria-label="Menu">
+          <a href="{{ url_for('public.home') }}" {% if pagina == 'public.home' %}aria-current="page"{% endif %}>Início</a>
+          <a href="{{ url_for('public.experiencias') }}" {% if pagina.startswith('public.experiencia') %}aria-current="page"{% endif %}>Experiências</a>
+          <a href="{{ url_for('public.descubra') }}" {% if pagina in ('public.descubra', 'public.resultado') %}aria-current="page"{% endif %}>Descubra seu momento</a>
+          <a href="{{ url_for('conta.meus_agendamentos') }}" {% if pagina == 'conta.meus_agendamentos' %}aria-current="page"{% endif %}>Meus agendamentos</a>
+          <a href="{{ url_for('public.contato') }}" {% if pagina == 'public.contato' %}aria-current="page"{% endif %}>Contato</a>
+          {% if user %}
+            {% if user.is_admin %}<a href="{{ url_for('admin.painel') }}">Administração</a>{% endif %}
+            <form method="post" action="{{ url_for('conta.sair') }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button type="submit">Sair</button></form>
+          {% else %}
+            <a href="{{ url_for('conta.entrar') }}" {% if pagina == 'conta.entrar' %}aria-current="page"{% endif %}>Entrar</a>
+          {% endif %}
+          <a class="btn" href="{{ url_for('reservas.agendar') }}">Agendar horário</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}
+  <div class="container avisos" role="status">
+    {% for cat, msg in msgs %}<div class="aviso aviso--{{ cat }}">{{ msg }}</div>{% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<main id="conteudo">
+{% block conteudo %}{% endblock %}
+</main>
+
+<footer class="rodape">
+  <div class="container">
+    <div class="rodape__marca" aria-hidden="true">Fonte <em>Serena</em></div>
+    <div class="rodape__grid">
+      <div class="rodape__col">
+        <span class="rodape__titulo">Head Spa · {{ S.cidade or 'Patos de Minas/MG' }}</span>
+        <p style="max-width:340px">Cuidado para a cabeça, o corpo e o silêncio. Uma pausa com tempo, água morna e mãos atentas.</p>
+        <a class="link-linha" style="align-self:flex-start;color:var(--creme);margin-top:10px" href="{{ url_for('reservas.agendar') }}">Agendar horário{{ m.icone('seta') }}</a>
+      </div>
+      <div class="rodape__col">
+        <span class="rodape__titulo">Navegação</span>
+        <a href="{{ url_for('public.home') }}">Início</a>
+        <a href="{{ url_for('public.experiencias') }}">Experiências</a>
+        <a href="{{ url_for('public.descubra') }}">Descubra seu momento</a>
+        <a href="{{ url_for('reservas.agendar') }}">Agendar</a>
+        <a href="{{ url_for('conta.meus_agendamentos') }}">Meus agendamentos</a>
+        <a href="{{ url_for('public.contato') }}">Contato</a>
+      </div>
+      <div class="rodape__col">
+        <span class="rodape__titulo">Atendimento</span>
+        <span>{{ horario_texto() }}</span>
+        {% if S.politicas %}<a href="{{ url_for('public.politicas') }}">Políticas de cancelamento</a>{% endif %}
+        <a href="{{ url_for('public.contato') }}#privacidade">Privacidade</a>
+      </div>
+      <div class="rodape__col">
+        <span class="rodape__titulo">Contato</span>
+        {% if wa_link %}<a href="{{ wa_link }}" target="_blank" rel="noopener">WhatsApp {{ S.whatsapp }}</a>{% endif %}
+        {% if ig_link %}<a href="{{ ig_link }}" target="_blank" rel="noopener">Instagram {{ S.instagram if S.instagram.startswith('@') else '@' ~ S.instagram }}</a>{% endif %}
+        {% if S.endereco %}<span>{{ S.endereco }}</span>{% endif %}
+        <span>{{ S.cidade }}</span>
+      </div>
+    </div>
+    <div class="rodape__base">
+      <span>© {{ agora().year }} Fonte Serena — Head Spa{% if S.cnpj %} · CNPJ {{ S.cnpj }}{% endif %}</span>
+      <span>Horários no fuso de Brasília · Reserva com sinal de 50% via Pix</span>
+    </div>
+  </div>
+</footer>
+
+<div class="barra-mobile" data-barra>
+  {% if wa_link %}<a class="btn btn--icone" href="{{ wa_link }}" target="_blank" rel="noopener" aria-label="WhatsApp">{{ m.icone('whatsapp') }}</a>{% endif %}
+  <a class="btn" href="{{ url_for('reservas.agendar') }}">Agendar horário</a>
+</div>
+
+<script src="{{ url_for('static', filename='js/site.js') }}?v=5" defer></script>
+</body>
+</html>

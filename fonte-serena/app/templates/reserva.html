@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% block titulo %}Reserva {{ b.codigo }}{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container">
+    <a class="link-seta" href="{{ url_for('conta.meus_agendamentos') }}">{{ m.icone('voltar') }}Meus agendamentos</a>
+    <div class="intro" style="margin-top:24px">
+      <span class="eyebrow">Reserva {{ b.codigo }}</span>
+      <h1 class="titulo">
+        {% if b.status == 'aguardando_pagamento' %}Falta só o sinal
+        {% elif b.status == 'pagamento_informado' %}Estamos conferindo seu Pix
+        {% elif b.status == 'confirmada' %}Reserva confirmada
+        {% elif b.status == 'expirada' %}O tempo para pagar acabou
+        {% else %}Reserva cancelada{% endif %}
+      </h1>
+    </div>
+    {% if b.status in ('aguardando_pagamento', 'pagamento_informado') %}{{ m.etapas(3) }}{% elif b.status == 'confirmada' %}{{ m.etapas(4) }}{% endif %}
+
+    <div class="reserva-grid">
+      <div>
+        {% if b.status == 'aguardando_pagamento' and payload %}
+          <div class="cartao" style="padding:36px;display:flex;flex-direction:column;gap:26px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <h2 class="titulo-m">Pague {{ b.sinal_centavos|reais }} por Pix</h2>
+              <p class="muted">Seu horário fica guardado por mais <span class="contador" data-prazo="{{ b.hold_ate.replace(' ', 'T') }}:00-03:00">{{ cfg.bloqueio }}:00</span> minutos.</p>
+            </div>
+            <div class="pix">
+              <div class="pix__qr" aria-label="QR Code Pix">{{ qr|safe }}</div>
+              <div style="display:flex;flex-direction:column;gap:14px;min-width:0;width:100%">
+                <span class="rotulo">Pix Copia e Cola</span>
+                <div class="copia">
+                  <input id="pix-codigo" type="text" readonly value="{{ payload }}" aria-label="Código Pix Copia e Cola">
+                  <button class="btn btn--p" type="button" data-copiar="#pix-codigo">{{ m.icone('copiar') }}Copiar</button>
+                </div>
+                <p class="muted pequeno">Abra o app do seu banco, escolha Pix Copia e Cola (ou leia o QR Code) e confira o recebedor: <strong>{{ S.pix_nome }}</strong>.</p>
+              </div>
+            </div>
+            <div class="sep"></div>
+            <div class="acoes" style="justify-content:space-between;align-items:center">
+              <form method="post" action="{{ url_for('reservas.cancelar', codigo=b.codigo) }}">
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <button class="btn btn--texto" type="submit">Cancelar reserva</button>
+              </form>
+              <form method="post" action="{{ url_for('reservas.paguei', codigo=b.codigo) }}">
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <button class="btn" type="submit">{{ m.icone('check') }}Já paguei</button>
+              </form>
+            </div>
+          </div>
+        {% elif b.status == 'pagamento_informado' %}
+          <div class="cartao vazio">
+            <div class="vazio__icone">{{ m.icone('relogio') }}</div>
+            <h2 class="titulo-m">Recebemos seu aviso de pagamento</h2>
+            <p>A equipe confere o Pix durante o horário de atendimento. Assim que for confirmado, a reserva aparece como confirmada em Meus agendamentos. Seu horário já está guardado.</p>
+            {% if wa_link %}<a class="btn btn--contorno" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Enviar comprovante no WhatsApp</a>{% endif %}
+          </div>
+        {% elif b.status == 'confirmada' %}
+          <div class="cartao vazio">
+            <div class="vazio__icone">{{ m.icone('check') }}</div>
+            <h2 class="titulo-m">Te esperamos {{ b.inicio|data_longa }}, às {{ b.inicio|hora }}</h2>
+            <p>O restante de {{ (b.preco_centavos - b.sinal_centavos)|reais }} é pago no dia, no espaço. Chegue com uns minutinhos de antecedência.</p>
+            <div class="acoes" style="justify-content:center">
+              {% if pode_remarcar %}<a class="btn btn--contorno" href="{{ url_for('reservas.remarcar', codigo=b.codigo) }}">Remarcar</a>{% endif %}
+              {% if mapa_link() %}<a class="btn" href="{{ mapa_link() }}" target="_blank" rel="noopener">{{ m.icone('pino') }}Como chegar</a>{% endif %}
+            </div>
+          </div>
+        {% else %}
+          <div class="cartao vazio">
+            <div class="vazio__icone">{{ m.icone('calendario') }}</div>
+            <h2 class="titulo-m">{% if b.status == 'expirada' %}O horário foi liberado{% else %}Esta reserva foi cancelada{% endif %}</h2>
+            <p>{% if b.status == 'expirada' %}Se você já pagou o Pix, fale com a gente pelo WhatsApp que resolvemos. {% endif %}Você pode escolher um novo horário quando quiser.</p>
+            <div class="acoes" style="justify-content:center">
+              <a class="btn" href="{{ url_for('reservas.horario', slug=b.exp_slug) }}">Escolher novo horário</a>
+              {% if wa_link %}<a class="btn btn--contorno" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}WhatsApp</a>{% endif %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <aside class="cartao resumo">
+        <h2 class="titulo-p">Resumo</h2>
+        <div class="resumo__linha"><span>Status</span>{{ m.etiqueta_status(b.status) }}</div>
+        <div class="resumo__linha"><span>Experiência</span><span>{{ b.exp_nome }}</span></div>
+        <div class="resumo__linha"><span>Data</span><span>{{ b.inicio|data_longa }}</span></div>
+        <div class="resumo__linha"><span>Horário</span><span>{{ b.inicio|hora }}</span></div>
+        <div class="sep"></div>
+        <div class="resumo__linha"><span>Valor total</span><span>{{ b.preco_centavos|reais }}</span></div>
+        <div class="resumo__linha resumo__linha--forte"><span>Sinal (50%)</span><span>{{ b.sinal_centavos|reais }}</span></div>
+        <div class="resumo__linha"><span>No dia</span><span>{{ (b.preco_centavos - b.sinal_centavos)|reais }}</span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

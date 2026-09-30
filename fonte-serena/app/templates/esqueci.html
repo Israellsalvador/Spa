@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% block titulo %}Esqueci minha senha{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container estreito">
+    <div class="cartao vazio">
+      <div class="vazio__icone">{{ m.icone('escudo') }}</div>
+      <h1 class="titulo-m">Vamos recuperar seu acesso</h1>
+      <p>Fale com a gente pelo WhatsApp informando o e-mail da sua conta. Enviamos uma senha temporária para você entrar e seguir com suas reservas.</p>
+      <div class="acoes" style="justify-content:center">
+        {% if wa_link %}<a class="btn" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Chamar no WhatsApp</a>{% endif %}
+        <a class="btn btn--contorno" href="{{ url_for('conta.entrar') }}">Voltar para entrar</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

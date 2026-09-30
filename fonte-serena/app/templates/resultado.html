@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block titulo %}Sugestões para você{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container">
+    <div class="intro">
+      <span class="eyebrow">Descubra seu momento</span>
+      <h1 class="titulo">{% if sugestoes %}Separamos estas experiências para você{% else %}Vamos montar o seu momento juntas{% endif %}</h1>
+      {% if resumo %}<p class="lead">Suas respostas: {{ resumo }}.</p>{% endif %}
+      {% if resumo %}<p class="muted pequeno">Se você reservar agora, levamos essas preferências para o atendimento.</p>{% endif %}
+    </div>
+
+    {% if sugestoes %}
+      <div class="grade grade--3">
+        {% for e in sugestoes %}{{ m.cartao_experiencia(e) }}{% endfor %}
+      </div>
+    {% else %}
+      <div class="cartao vazio">
+        <div class="vazio__icone">{{ m.icone('ondas') }}</div>
+        <h2 class="titulo-m">Fale com a gente</h2>
+        <p>Ainda estamos publicando as experiências no site. Pelo WhatsApp, indicamos a melhor opção para o seu momento.</p>
+        {% if wa_link %}<a class="btn" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Chamar no WhatsApp</a>{% endif %}
+      </div>
+    {% endif %}
+
+    <div class="acoes" style="margin-top:36px">
+      <a class="btn btn--contorno" href="{{ url_for('public.descubra', recomecar=1) }}">Refazer o questionário</a>
+      <a class="btn btn--texto" href="{{ url_for('public.experiencias') }}">Ver todas as experiências</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% block titulo %}Agendar{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container">
+    <div class="intro">
+      <span class="eyebrow">Agendar</span>
+      <h1 class="titulo">Sua reserva em poucos passos</h1>
+      <p class="lead">Escolha a experiência e o horário e pague só o sinal de 50% por Pix. O restante fica para o dia do atendimento.</p>
+    </div>
+    {{ m.etapas(1) }}
+
+    {% if reservaveis %}
+      <div class="reserva-grid">
+        <div class="lista">
+          <h2 class="titulo-m" style="margin-bottom:8px">Qual experiência você quer reservar?</h2>
+          {% for e in reservaveis %}
+            <a class="escolha" href="{{ url_for('reservas.horario', slug=e.slug) }}">
+              {{ m.foto(foto_exp(e), classe='escolha__foto', alt='') }}
+              <div class="escolha__info">
+                <strong>{{ e.nome }}</strong>
+                {% if e.resumo %}<span>{{ e.resumo }}</span>{% endif %}
+              </div>
+              <div class="escolha__valor"><strong>{{ e.preco_centavos|reais }}</strong><small>{{ e.duracao_min|duracao }}</small></div>
+              <span class="escolha__seta">{{ m.icone('seta') }}</span>
+            </a>
+          {% endfor %}
+          {% for e in a_confirmar %}
+            <div class="escolha escolha--off">
+              <div class="escolha__info">
+                <strong>{{ e.nome }}</strong>
+                <span>Valores a confirmar — fale com a gente para agendar</span>
+              </div>
+              {% if wa_link %}<a class="link-seta" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}WhatsApp</a>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <aside class="cartao resumo">
+          <h2 class="titulo-p">Como funciona</h2>
+          <ul class="lista-check">
+            <li>{{ m.icone('check') }}<span>Você escolhe o dia e o horário livre.</span></li>
+            <li>{{ m.icone('check') }}<span>Paga 50% por Pix para garantir a vaga.</span></li>
+            <li>{{ m.icone('check') }}<span>O restante é pago no dia, no espaço.</span></li>
+            <li>{{ m.icone('check') }}<span>Pode remarcar até {{ S.remarcar_horas or 8 }}h antes pelo site.</span></li>
+          </ul>
+        </aside>
+      </div>
+    {% else %}
+      <div class="cartao vazio">
+        <div class="vazio__icone">{{ m.icone('ondas') }}</div>
+        <h2 class="titulo-m">Vamos combinar o seu horário</h2>
+        <p>As reservas pelo site estão sendo organizadas. Enquanto isso, fale com a gente pelo WhatsApp e agendamos com você.</p>
+        <div class="acoes" style="justify-content:center">
+          {% if wa_link %}<a class="btn" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Chamar no WhatsApp</a>{% endif %}
+          <a class="btn btn--contorno" href="{{ url_for('public.experiencias') }}">Ver experiências</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

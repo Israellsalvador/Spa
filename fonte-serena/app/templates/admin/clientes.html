@@ -1,0 +1,27 @@
+{% extends 'admin/base.html' %}
+{% block titulo %}Clientes{% endblock %}
+{% block conteudo %}
+<div class="admin-titulo"><div><span class="eyebrow">Clientes</span><h1 class="titulo" style="font-size:40px">Contas cadastradas</h1></div></div>
+<div class="tabela-wrap">
+<table class="tabela">
+  <thead><tr><th>Nome</th><th>E-mail</th><th>WhatsApp</th><th>Reservas</th><th>Desde</th><th></th></tr></thead>
+  <tbody>
+  {% for u in rows %}
+    <tr>
+      <td><strong>{{ u.nome }}</strong>{% if u.is_admin %} <span class="etiqueta">Admin</span>{% endif %}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.telefone or '—' }}</td>
+      <td>{{ u.reservas }}</td>
+      <td>{{ (u.criado_em|dt).strftime('%d/%m/%Y') }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin.nova_senha', uid=u.id) }}" data-confirmar="Gerar uma nova senha temporária para {{ u.nome }}?">
+          <input type="hidden" name="csrf" value="{{ csrf_token }}">
+          <button class="btn btn--p btn--contorno" type="submit">Nova senha</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

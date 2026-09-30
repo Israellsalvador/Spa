@@ -1,0 +1,81 @@
+{% extends 'admin/base.html' %}
+{% block titulo %}Configurações{% endblock %}
+{% block conteudo %}
+<div class="admin-titulo"><div><span class="eyebrow">Configurações</span><h1 class="titulo" style="font-size:40px">Dados do espaço</h1></div></div>
+<form method="post" enctype="multipart/form-data" style="max-width:860px">
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+
+  <fieldset class="fieldset">
+    <legend>Pix (para o sinal de 50%)</legend>
+    <p class="muted pequeno">Sem chave Pix e nome do recebedor, o site não abre reservas online — mostra o WhatsApp no lugar.</p>
+    <div class="campo"><label for="pix_chave">Chave Pix</label><input id="pix_chave" name="pix_chave" value="{{ S.pix_chave }}" placeholder="CPF/CNPJ, e-mail, +5534999999999 ou chave aleatória"><small>Telefone no formato +55 DDD número.</small></div>
+    <div class="form-grid">
+      <div class="campo"><label for="pix_nome">Nome do recebedor</label><input id="pix_nome" name="pix_nome" maxlength="25" value="{{ S.pix_nome }}"><small>Como aparece no banco (até 25 letras, sem acento).</small></div>
+      <div class="campo"><label for="pix_cidade">Cidade do recebedor</label><input id="pix_cidade" name="pix_cidade" maxlength="15" value="{{ S.pix_cidade }}"></div>
+    </div>
+  </fieldset>
+
+  <fieldset class="fieldset">
+    <legend>Contato</legend>
+    <div class="form-grid">
+      <div class="campo"><label for="whatsapp">WhatsApp</label><input id="whatsapp" name="whatsapp" value="{{ S.whatsapp }}" placeholder="(34) 99999-9999"></div>
+      <div class="campo"><label for="instagram">Instagram</label><input id="instagram" name="instagram" value="{{ S.instagram }}" placeholder="@fonteserena"></div>
+    </div>
+    <div class="form-grid">
+      <div class="campo"><label for="endereco">Endereço</label><input id="endereco" name="endereco" value="{{ S.endereco }}" placeholder="Rua, número, bairro"></div>
+      <div class="campo"><label for="cidade">Cidade/UF</label><input id="cidade" name="cidade" value="{{ S.cidade }}"></div>
+    </div>
+    <div class="campo"><label for="referencia">Ponto de referência / instruções de chegada</label><input id="referencia" name="referencia" value="{{ S.referencia }}"></div>
+    <div class="campo"><label for="maps_url">Link do Google Maps (opcional)</label><input id="maps_url" name="maps_url" value="{{ S.maps_url }}" placeholder="https://maps.app.goo.gl/..."><small>Sem link, o botão "Como chegar" usa o endereço.</small></div>
+    <div class="form-grid">
+      <div class="campo"><label for="email_contato">E-mail de contato</label><input id="email_contato" name="email_contato" type="email" value="{{ S.email_contato }}"></div>
+      <div class="campo"><label for="email_privacidade">E-mail para pedidos de dados (LGPD)</label><input id="email_privacidade" name="email_privacidade" type="email" value="{{ S.email_privacidade }}"></div>
+    </div>
+    <div class="campo"><label for="cnpj">CNPJ</label><input id="cnpj" name="cnpj" value="{{ S.cnpj }}"></div>
+  </fieldset>
+
+  <fieldset class="fieldset">
+    <legend>Agenda</legend>
+    <div class="rotulo">Dias de atendimento</div>
+    <div class="dias-semana">
+      {% for nome in ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'] %}
+        <label class="check"><input type="checkbox" name="dias_semana" value="{{ loop.index0 }}" {% if loop.index0 in cfg.dias %}checked{% endif %}> {{ nome }}</label>
+      {% endfor %}
+    </div>
+    <div class="form-grid">
+      <div class="campo"><label for="hora_inicio">Primeiro horário</label><input id="hora_inicio" name="hora_inicio" type="time" value="{{ S.hora_inicio }}"></div>
+      <div class="campo"><label for="ultimo_inicio">Último início</label><input id="ultimo_inicio" name="ultimo_inicio" type="time" value="{{ S.ultimo_inicio }}"></div>
+      <div class="campo"><label for="intervalo_min">Intervalo entre horários (min)</label><input id="intervalo_min" name="intervalo_min" type="number" min="5" step="5" value="{{ S.intervalo_min }}"></div>
+      <div class="campo"><label for="capacidade">Atendimentos simultâneos</label><input id="capacidade" name="capacidade" type="number" min="1" value="{{ S.capacidade }}"><small>Quantas clientes podem ser atendidas ao mesmo tempo.</small></div>
+      <div class="campo"><label for="antecedencia_horas">Antecedência mínima (horas)</label><input id="antecedencia_horas" name="antecedencia_horas" type="number" min="0" value="{{ S.antecedencia_horas }}"></div>
+      <div class="campo"><label for="janela_dias">Abrir agenda para os próximos (dias)</label><input id="janela_dias" name="janela_dias" type="number" min="1" value="{{ S.janela_dias }}"></div>
+      <div class="campo"><label for="bloqueio_min">Tempo para pagar o Pix (min)</label><input id="bloqueio_min" name="bloqueio_min" type="number" min="5" value="{{ S.bloqueio_min }}"></div>
+      <div class="campo"><label for="remarcar_horas">Remarcação pelo site até (horas antes)</label><input id="remarcar_horas" name="remarcar_horas" type="number" min="0" value="{{ S.remarcar_horas }}"></div>
+    </div>
+    <div class="campo"><label for="datas_bloqueadas">Datas sem atendimento (feriados, folgas)</label><textarea id="datas_bloqueadas" name="datas_bloqueadas" placeholder="15/11/2026&#10;25/12/2026">{{ S.datas_bloqueadas }}</textarea><small>Uma data por linha, no formato dd/mm/aaaa.</small></div>
+  </fieldset>
+
+  <fieldset class="fieldset">
+    <legend>Políticas de cancelamento e reembolso</legend>
+    <div class="campo"><label for="politicas">Texto das políticas</label><textarea id="politicas" name="politicas" style="min-height:200px">{{ S.politicas }}</textarea><small>Deixe uma linha em branco entre parágrafos. Publique antes de começar a cobrar sinais.</small></div>
+  </fieldset>
+
+  <fieldset class="fieldset">
+    <legend>Fotos do site</legend>
+    <div class="form-grid">
+      <div class="campo">
+        <label for="hero_imagem">Foto principal (topo da página inicial)</label>
+        {% if S.hero_imagem %}<img class="miniatura" src="{{ url_for('media', nome=S.hero_imagem) }}" alt=""><label class="check"><input type="checkbox" name="remover_hero_imagem" value="1"> Remover</label>{% endif %}
+        <input id="hero_imagem" name="hero_imagem" type="file" accept="image/jpeg,image/png,image/webp">
+      </div>
+      <div class="campo">
+        <label for="sobre_imagem">Foto do espaço (Entrar e Visite)</label>
+        {% if S.sobre_imagem %}<img class="miniatura" src="{{ url_for('media', nome=S.sobre_imagem) }}" alt=""><label class="check"><input type="checkbox" name="remover_sobre_imagem" value="1"> Remover</label>{% endif %}
+        <input id="sobre_imagem" name="sobre_imagem" type="file" accept="image/jpeg,image/png,image/webp">
+      </div>
+    </div>
+  </fieldset>
+
+  <button class="btn btn--g" type="submit">Salvar configurações</button>
+</form>
+{% endblock %}

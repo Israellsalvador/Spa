@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    image: fonte-serena:latest
+    container_name: fonte-serena
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      # Só local: o Nginx do servidor faz o HTTPS e repassa para cá.
+      # Para testar sem Nginx, troque por "8000:8000".
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - dados:/data
+
+volumes:
+  dados:

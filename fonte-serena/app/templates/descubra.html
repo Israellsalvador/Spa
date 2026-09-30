@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% block titulo %}Descubra seu momento{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container estreito">
+    <div class="intro">
+      <span class="eyebrow">Descubra seu momento</span>
+      <h1 class="titulo">Uma jornada curta para encontrar o seu cuidado</h1>
+      <p class="lead">Seis perguntas opcionais. Você pode voltar, mudar respostas ou pular o que quiser. Nada aqui é diagnóstico — usamos só as suas preferências de cuidado.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px">
+      <span class="muted pequeno">Pergunta {{ passo }} de {{ perguntas|length }}</span>
+      <div class="progresso" aria-hidden="true">
+        {% for p in perguntas %}
+          <div class="{% if loop.index < passo %}feito{% elif loop.index == passo %}atual{% endif %}"><i></i><span>{{ p.rotulo }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <form method="post" action="{{ url_for('public.descubra', passo=passo) }}" class="cartao quiz-card" data-limite="{{ pergunta.multipla }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token }}">
+      <input type="hidden" name="passo" value="{{ passo }}">
+      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:22px">
+        <legend style="padding:0;display:flex;flex-direction:column;gap:6px;margin-bottom:22px">
+          <span class="titulo-m">{{ pergunta.titulo }}</span>
+          <span class="muted pequeno">{{ pergunta.ajuda }}</span>
+        </legend>
+        <div class="opcoes">
+          {% for valor, rotulo, _ in pergunta.opcoes %}
+            <label class="opcao">
+              <input type="{{ 'checkbox' if pergunta.multipla > 1 else 'radio' }}" name="r" value="{{ valor }}" {% if valor in marcadas %}checked{% endif %}>
+              <span>{{ rotulo }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <div class="quiz-acoes">
+        <button class="btn btn--contorno" type="submit" name="acao" value="voltar" {% if passo == 1 %}disabled{% endif %}>{{ m.icone('voltar') }}Voltar</button>
+        <div class="acoes" style="align-items:center">
+          <button class="btn btn--texto" type="submit" name="acao" value="pular">Pular pergunta</button>
+          <button class="btn" type="submit" name="acao" value="continuar">{{ 'Ver sugestões' if passo == perguntas|length else 'Continuar' }}{{ m.icone('seta') }}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

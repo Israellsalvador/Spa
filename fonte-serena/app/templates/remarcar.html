@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% from '_seletor.html' import seletor with context %}
+{% block titulo %}Remarcar{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container">
+    <a class="link-seta" href="{{ url_for('conta.meus_agendamentos') }}">{{ m.icone('voltar') }}Meus agendamentos</a>
+    <div class="intro" style="margin-top:24px">
+      <span class="eyebrow">Remarcar · {{ b.exp_nome }}</span>
+      <h1 class="titulo">Escolha um novo horário</h1>
+      <p class="lead">Hoje: {{ b.inicio|data_longa }}, às {{ b.inicio|hora }}. O sinal já pago continua valendo.</p>
+    </div>
+    <div class="reserva-grid">
+      <div>
+        {% if dias %}
+          {{ seletor('reservas.remarcar', {'codigo': b.codigo}, dias, dia, horarios, escolhido) }}
+        {% else %}
+          <div class="cartao vazio"><h2 class="titulo-m">Sem horários livres agora</h2><p>Fale com a gente pelo WhatsApp para encontrarmos um horário.</p></div>
+        {% endif %}
+      </div>
+      <aside class="cartao resumo" id="confirmar">
+        <h2 class="titulo-p">Novo horário</h2>
+        <div class="resumo__linha"><span>Data</span><span>{{ (escolhido|data_longa) if escolhido else '—' }}</span></div>
+        <div class="resumo__linha"><span>Horário</span><span>{{ escolhido.strftime('%H:%M') if escolhido else '—' }}</span></div>
+        {% if escolhido %}
+          <form method="post" action="{{ url_for('reservas.remarcar', codigo=b.codigo) }}">
+            <input type="hidden" name="csrf" value="{{ csrf_token }}">
+            <input type="hidden" name="data" value="{{ escolhido.strftime('%Y-%m-%d') }}">
+            <input type="hidden" name="hora" value="{{ escolhido.strftime('%H:%M') }}">
+            <button class="btn btn--bloco" type="submit">Confirmar remarcação</button>
+          </form>
+        {% else %}
+          <button class="btn btn--bloco" type="button" disabled>Escolha um horário</button>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

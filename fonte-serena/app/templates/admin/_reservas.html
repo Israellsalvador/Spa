@@ -1,0 +1,34 @@
+{% import "_macros.html" as m with context %}
+{% macro tabela_reservas(rows, voltar, mostrar_acoes=True) -%}
+<div class="tabela-wrap">
+<table class="tabela">
+  <thead><tr><th>Quando</th><th>Cliente</th><th>Experiência</th><th>Sinal</th><th>Status</th>{% if mostrar_acoes %}<th>Ações</th>{% endif %}</tr></thead>
+  <tbody>
+  {% for b in rows %}
+    <tr>
+      <td><strong>{{ (b.inicio|dt).strftime('%d/%m') }}</strong> · {{ b.inicio|hora }}<br><span class="muted pequeno">{{ b.codigo }}</span></td>
+      <td>{{ b.cliente }}<br><span class="muted pequeno">{{ b.telefone or b.email }}</span></td>
+      <td>{{ b.exp_nome }}{% if b.observacoes %}<br><span class="muted pequeno">{{ b.observacoes }}</span>{% endif %}</td>
+      <td>{{ b.sinal_centavos|reais }}<br><span class="muted pequeno">total {{ b.preco_centavos|reais }}</span></td>
+      <td>{{ m.etiqueta_status(b.status) }}{% if b.status == 'aguardando_pagamento' and b.hold_ate %}<br><span class="muted pequeno">bloqueio até {{ b.hold_ate[11:] }}</span>{% endif %}</td>
+      {% if mostrar_acoes %}
+      <td>
+        <div class="acoes-linha">
+          {% if b.status in ('aguardando_pagamento', 'pagamento_informado', 'expirada') %}
+            <form method="post" action="{{ url_for('admin.reserva_acao', bid=b.id, acao='confirmar') }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="voltar" value="{{ voltar }}"><button class="btn btn--p" type="submit">Pix recebido</button></form>
+          {% endif %}
+          {% if b.status in ('aguardando_pagamento', 'pagamento_informado') %}
+            <form method="post" action="{{ url_for('admin.reserva_acao', bid=b.id, acao='recusar') }}" data-confirmar="Cancelar esta reserva e liberar o horário?"><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="voltar" value="{{ voltar }}"><button class="btn btn--p btn--contorno" type="submit">Não recebido</button></form>
+          {% elif b.status == 'confirmada' %}
+            <form method="post" action="{{ url_for('admin.reserva_acao', bid=b.id, acao='cancelar') }}" data-confirmar="Cancelar esta reserva confirmada? O horário será liberado."><input type="hidden" name="csrf" value="{{ csrf_token }}"><input type="hidden" name="voltar" value="{{ voltar }}"><button class="btn btn--p btn--texto" type="submit">Cancelar</button></form>
+          {% endif %}
+          {% if b.telefone and (b.telefone|wa) %}<a class="btn btn--p btn--texto" href="{{ b.telefone|wa }}" target="_blank" rel="noopener">WhatsApp</a>{% endif %}
+        </div>
+      </td>
+      {% endif %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{%- endmacro %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block titulo %}Políticas{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container estreito">
+    <div class="intro">
+      <span class="eyebrow">Políticas</span>
+      <h1 class="titulo">Cancelamento, remarcação e reembolso</h1>
+    </div>
+    {% if S.politicas %}
+      <div class="texto-longo">
+        {% for p in S.politicas.replace('\r\n', '\n').split('\n\n') if p.strip() %}<p>{{ p|replace('\n', ' ') }}</p>{% endfor %}
+      </div>
+    {% else %}
+      <div class="texto-longo">
+        <p>Remarcações podem ser feitas pelo site até {{ S.remarcar_horas or 8 }} horas antes do horário marcado, sem pagar o sinal de novo.</p>
+        <p>Para cancelamentos de reservas com sinal pago, fale com a gente pelo WhatsApp.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

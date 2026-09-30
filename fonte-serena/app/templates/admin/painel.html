@@ -1,0 +1,30 @@
+{% extends 'admin/base.html' %}
+{% from 'admin/_reservas.html' import tabela_reservas with context %}
+{% block titulo %}Painel{% endblock %}
+{% block conteudo %}
+<div class="admin-titulo">
+  <div><span class="eyebrow">Administração</span><h1 class="titulo" style="font-size:40px">Olá! Aqui está o seu dia.</h1></div>
+  <a class="btn btn--contorno" href="{{ url_for('admin.agenda') }}">{{ m.icone('calendario') }}Abrir agenda de hoje</a>
+</div>
+
+{% if pendencias %}
+<div class="pendencias">
+  <strong>Antes de abrir as reservas online, falta:</strong>
+  {% for texto, link in pendencias %}<span>• <a href="{{ link }}">{{ texto }}</a></span>{% endfor %}
+</div>
+{% endif %}
+
+<div class="painel-grid">
+  <section>
+    <h2 class="titulo-m" style="margin-bottom:6px">Pix para conferir</h2>
+    <p class="muted pequeno" style="margin-bottom:16px">Confira no app do banco se o sinal caiu (o código da reserva vai no identificador do Pix). Depois marque como recebido — a cliente vê a confirmação na conta dela.</p>
+    {% if conferir %}{{ tabela_reservas(conferir, url_for('admin.painel')) }}
+    {% else %}<div class="cartao vazio" style="padding:32px"><p>Nenhum pagamento aguardando conferência.</p></div>{% endif %}
+  </section>
+  <section>
+    <h2 class="titulo-m" style="margin-bottom:16px">Próximos atendimentos confirmados (14 dias)</h2>
+    {% if proximas %}{{ tabela_reservas(proximas, url_for('admin.painel')) }}
+    {% else %}<div class="cartao vazio" style="padding:32px"><p>Nenhum atendimento confirmado nos próximos 14 dias.</p></div>{% endif %}
+  </section>
+</div>
+{% endblock %}

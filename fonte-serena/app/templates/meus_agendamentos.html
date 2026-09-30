@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block body_class %}{% endblock %}
+{% block titulo %}Meus agendamentos{% endblock %}
+{% block conteudo %}
+<section class="pagina">
+  <div class="container">
+    <div class="cabecalho-secao" style="margin-bottom:36px">
+      <div class="intro" style="margin-bottom:0">
+        <span class="eyebrow">Minha conta</span>
+        <h1 class="titulo">Meus agendamentos</h1>
+      </div>
+      <a class="btn" href="{{ url_for('reservas.agendar') }}">{{ m.icone('calendario') }}Nova reserva</a>
+    </div>
+
+    <div class="conta-grid">
+      <div>
+        <nav class="abas">
+          <a class="aba" href="{{ url_for('conta.meus_agendamentos') }}" aria-current="{{ 'true' if aba != 'anteriores' else 'false' }}">Próximos ({{ proximos|length }})</a>
+          <a class="aba" href="{{ url_for('conta.meus_agendamentos', aba='anteriores') }}" aria-current="{{ 'true' if aba == 'anteriores' else 'false' }}">Anteriores</a>
+        </nav>
+        {% set lista = anteriores if aba == 'anteriores' else proximos %}
+        {% if lista %}
+          <div class="lista">
+            {% for b in lista %}
+              {% set ini = b.inicio|dt %}
+              <article class="cartao reserva-item">
+                <div class="data-bloco">
+                  <small>{{ ['SEG','TER','QUA','QUI','SEX','SÁB','DOM'][ini.weekday()] }}</small>
+                  <strong>{{ ini.day }}</strong>
+                  <span>{{ ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][ini.month - 1] }}</span>
+                </div>
+                <div class="reserva-item__info">
+                  <div class="reserva-item__topo"><span class="titulo-p">{{ b.exp_nome }}</span>{{ m.etiqueta_status(b.status) }}</div>
+                  <span class="muted">{{ ini.strftime('%H:%M') }} · horário de Brasília · código {{ b.codigo }}</span>
+                  <span class="pequeno muted">
+                    {% if b.status == 'confirmada' %}Sinal pago · restante de {{ (b.preco_centavos - b.sinal_centavos)|reais }} no dia{% if not pode_remarcar(b) and ini > agora() %} · remarcação pelo site encerrada{% endif %}
+                    {% elif b.status == 'aguardando_pagamento' %}Pague o sinal de {{ b.sinal_centavos|reais }} para garantir o horário
+                    {% elif b.status == 'pagamento_informado' %}Estamos conferindo o seu Pix
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="reserva-item__acoes">
+                  {% if b.status == 'aguardando_pagamento' %}
+                    <a class="btn btn--p" href="{{ url_for('reservas.pagamento', codigo=b.codigo) }}">Pagar sinal</a>
+                  {% elif b.status == 'confirmada' and pode_remarcar(b) %}
+                    <a class="btn btn--p btn--contorno" href="{{ url_for('reservas.remarcar', codigo=b.codigo) }}">Remarcar</a>
+                    <a class="btn btn--p btn--texto" href="{{ url_for('reservas.pagamento', codigo=b.codigo) }}">Detalhes</a>
+                  {% else %}
+                    <a class="btn btn--p btn--contorno" href="{{ url_for('reservas.pagamento', codigo=b.codigo) }}">Detalhes</a>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="cartao vazio">
+            <div class="vazio__icone">{{ m.icone('calendario') }}</div>
+            <h2 class="titulo-m">{% if aba == 'anteriores' %}Nenhuma reserva anterior{% else %}Você ainda não tem horários marcados{% endif %}</h2>
+            <p>Quando você reservar, seus horários aparecem aqui.</p>
+            <a class="btn" href="{{ url_for('reservas.agendar') }}">Agendar horário</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <aside class="lateral">
+        <div class="cartao" style="display:flex;flex-direction:column;gap:10px">
+          <span class="eyebrow">Sua conta</span>
+          <strong style="font-size:17px">{{ user.nome }}</strong>
+          <span class="muted pequeno">{{ user.email }}</span>
+          <div class="sep" style="margin:6px 0"></div>
+          <form method="post" action="{{ url_for('conta.sair') }}"><input type="hidden" name="csrf" value="{{ csrf_token }}"><button class="btn btn--texto" style="padding:0" type="submit">Sair da conta</button></form>
+        </div>
+        <div class="caixa" style="flex-direction:column;gap:10px">
+          <strong>Precisa de ajuda?</strong>
+          <span class="muted pequeno">Remarcações pelo site até {{ cfg.remarcar }}h antes. Para cancelar uma reserva paga ou qualquer outra dúvida, fale com a gente: {{ horario_texto()|lower }}.</span>
+          {% if wa_link %}<a class="link-seta" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Chamar no WhatsApp</a>{% endif %}
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

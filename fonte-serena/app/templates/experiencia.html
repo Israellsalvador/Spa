@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ e.nome }}{% endblock %}
+{% block descricao %}{{ e.resumo or e.nome }} — Fonte Serena, Head Spa em Patos de Minas/MG.{% endblock %}
+{% block capa_class %}sobre-capa{% endblock %}
+{% block conteudo %}
+<section class="exp-capa">
+  <div class="exp-capa__texto">
+    <a class="link-seta" href="{{ url_for('public.experiencias') }}">{{ m.icone('voltar') }}Experiências</a>
+    <span class="eyebrow">{{ CATEGORIAS.get(e.categoria) }}</span>
+    <h1 class="titulo">{{ e.nome }}</h1>
+    {% if e.resumo %}<p class="lead">{{ e.resumo }}</p>{% endif %}
+    {% if reservavel(e) %}
+      <div class="metricas">
+        <div><small>Duração</small><strong>{{ e.duracao_min|duracao }}</strong></div>
+        <div><small>Valor</small><strong>{{ e.preco_centavos|reais }}</strong></div>
+        <div><small>Sinal (50%)</small><strong>{{ ((e.preco_centavos + 1) // 2)|reais }}</strong></div>
+      </div>
+      <div class="acoes"><a class="btn btn--claro btn--g" href="{{ url_for('reservas.horario', slug=e.slug) }}">Escolher dia e horário</a></div>
+    {% elif wa_link %}
+      <div class="acoes"><a class="btn btn--claro btn--g" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Consultar no WhatsApp</a></div>
+    {% endif %}
+  </div>
+  {{ m.foto(foto_exp(e), alt=e.nome, eager=True) }}
+</section>
+
+<section class="secao">
+  <div class="container exp-detalhe">
+    <div style="display:flex;flex-direction:column;gap:40px">
+      <div class="intro" style="margin-bottom:0">
+        <span class="rotulo-sec" data-revelar>A experiência</span>
+        {% set paragrafos = (e.descricao or '').replace('\r\n', '\n').split('\n\n')|select|list %}
+        <h2 class="titulo-m" data-revelar style="--atraso:.1s;font-size:clamp(32px,3.6vw,48px)">{{ paragrafos[0] if paragrafos else (e.resumo or e.nome) }}</h2>
+      </div>
+      {% if paragrafos|length > 1 %}
+        <div class="texto-longo" data-revelar>{% for p in paragrafos[1:] %}<p>{{ p }}</p>{% endfor %}</div>
+      {% endif %}
+      {% if e.inclui %}
+        <div style="display:flex;flex-direction:column;gap:18px" data-revelar>
+          <span class="rotulo">O que inclui</span>
+          <ul class="inclui">{% for item in e.inclui.splitlines() if item.strip() %}<li>{{ m.icone('check') }}{{ item }}</li>{% endfor %}</ul>
+        </div>
+      {% endif %}
+    </div>
+    <aside class="caixa-reserva" data-revelar>
+      {% if reservavel(e) %}
+        <span class="rotulo">Reserva</span>
+        <div class="resumo__linha"><span>Duração</span><span>{{ e.duracao_min|duracao }}</span></div>
+        <div class="resumo__linha"><span>Valor total</span><span>{{ e.preco_centavos|reais }}</span></div>
+        <div class="resumo__linha resumo__linha--forte"><span>Sinal no Pix (50%)</span><span>{{ ((e.preco_centavos + 1) // 2)|reais }}</span></div>
+        <div class="resumo__linha"><span>No dia do atendimento</span><span>{{ (e.preco_centavos - (e.preco_centavos + 1) // 2)|reais }}</span></div>
+        <a class="btn btn--bloco" href="{{ url_for('reservas.horario', slug=e.slug) }}">Escolher dia e horário</a>
+        <p class="muted pequeno">Remarque sozinha até {{ S.remarcar_horas or 8 }}h antes, sem pagar o sinal de novo.</p>
+      {% else %}
+        <span class="rotulo">Valores em definição</span>
+        <p class="muted">Fale com a gente para saber mais e combinar o seu horário.</p>
+        {% if wa_link %}<a class="btn btn--bloco" href="{{ wa_link }}" target="_blank" rel="noopener">{{ m.icone('whatsapp') }}Consultar no WhatsApp</a>{% endif %}
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

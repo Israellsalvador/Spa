@@ -1,0 +1,31 @@
+{% extends 'admin/base.html' %}
+{% block titulo %}Experiências{% endblock %}
+{% block conteudo %}
+<div class="admin-titulo">
+  <div><span class="eyebrow">Catálogo</span><h1 class="titulo" style="font-size:40px">Experiências</h1>
+  <p class="muted" style="margin-top:8px">Só aparecem para reserva online as experiências ativas com duração e preço preenchidos.</p></div>
+  <a class="btn" href="{{ url_for('admin.experiencia') }}">Nova experiência</a>
+</div>
+<div class="tabela-wrap">
+<table class="tabela">
+  <thead><tr><th></th><th>Nome</th><th>Categoria</th><th>Duração</th><th>Preço</th><th>Situação</th><th></th></tr></thead>
+  <tbody>
+  {% for e in exps %}
+    <tr>
+      <td style="width:92px">{% if e.imagem %}<img class="miniatura" style="width:72px;height:52px" src="{{ url_for('media', nome=e.imagem) }}" alt="">{% endif %}</td>
+      <td><strong>{{ e.nome }}</strong>{% if e.destaque %} <span class="etiqueta">Destaque</span>{% endif %}</td>
+      <td>{{ CATEGORIAS.get(e.categoria) }}</td>
+      <td>{{ (e.duracao_min|duracao) or '—' }}</td>
+      <td>{{ (e.preco_centavos|reais) or '—' }}</td>
+      <td>
+        {% if not e.ativo %}<span class="etiqueta etiqueta--cinza">Oculta</span>
+        {% elif reservavel(e) %}<span class="etiqueta etiqueta--verde">Reserva online</span>
+        {% else %}<span class="etiqueta etiqueta--ambar">Falta duração/preço</span>{% endif %}
+      </td>
+      <td><a class="btn btn--p btn--contorno" href="{{ url_for('admin.experiencia', eid=e.id) }}">Editar</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

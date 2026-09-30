@@ -1,0 +1,43 @@
+{% extends 'admin/base.html' %}
+{% block titulo %}{{ e.nome if e else 'Nova experiência' }}{% endblock %}
+{% block conteudo %}
+<a class="link-seta" href="{{ url_for('admin.experiencias') }}">{{ m.icone('voltar') }}Experiências</a>
+<h1 class="titulo" style="font-size:40px;margin:16px 0 28px">{{ e.nome if e else 'Nova experiência' }}</h1>
+<form method="post" enctype="multipart/form-data" style="max-width:860px">
+  <input type="hidden" name="csrf" value="{{ csrf_token }}">
+  <fieldset class="fieldset">
+    <legend>Informações</legend>
+    <div class="form-grid">
+      <div class="campo"><label for="nome">Nome</label><input id="nome" name="nome" required value="{{ request.form.nome or (e.nome if e else '') }}"></div>
+      <div class="campo"><label for="categoria">Categoria</label>
+        <select id="categoria" name="categoria">
+          {% for k, v in CATEGORIAS.items() %}<option value="{{ k }}" {% if (request.form.categoria or (e.categoria if e else '')) == k %}selected{% endif %}>{{ v }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="campo"><label for="resumo">Resumo (uma frase, aparece nos cartões)</label><input id="resumo" name="resumo" maxlength="140" value="{{ request.form.resumo or (e.resumo if e else '') }}"></div>
+    <div class="campo"><label for="descricao">Descrição completa</label><textarea id="descricao" name="descricao">{{ request.form.descricao or (e.descricao if e else '') }}</textarea><small>Deixe uma linha em branco entre parágrafos.</small></div>
+    <div class="campo"><label for="inclui">O que inclui (um item por linha)</label><textarea id="inclui" name="inclui" style="min-height:100px">{{ request.form.inclui or (e.inclui if e else '') }}</textarea></div>
+  </fieldset>
+  <fieldset class="fieldset">
+    <legend>Duração e valor</legend>
+    <div class="form-grid">
+      <div class="campo"><label for="duracao_min">Duração (minutos)</label><input id="duracao_min" name="duracao_min" type="number" min="10" max="600" step="5" value="{{ request.form.duracao_min or (e.duracao_min if e and e.duracao_min else '') }}"><small>Ex.: 60, 90, 180.</small></div>
+      <div class="campo"><label for="preco">Preço total (R$)</label><input id="preco" name="preco" inputmode="decimal" placeholder="180,00" value="{{ request.form.preco or (('%.2f'|format(e.preco_centavos / 100))|replace('.', ',') if e and e.preco_centavos else '') }}"><small>O sinal de 50% é calculado automaticamente.</small></div>
+    </div>
+  </fieldset>
+  <fieldset class="fieldset">
+    <legend>Foto e exibição</legend>
+    {% if e and e.imagem %}<img class="miniatura" src="{{ url_for('media', nome=e.imagem) }}" alt=""><label class="check"><input type="checkbox" name="remover_imagem" value="1"> Remover foto</label>{% endif %}
+    <div class="campo"><label for="imagem">Foto (JPG, PNG ou WEBP, até 8 MB)</label><input id="imagem" name="imagem" type="file" accept="image/jpeg,image/png,image/webp"></div>
+    <div class="form-grid">
+      <div class="campo"><label for="ordem">Ordem de exibição</label><input id="ordem" name="ordem" type="number" value="{{ e.ordem if e else 0 }}"></div>
+      <div style="display:flex;flex-direction:column;gap:12px;justify-content:center">
+        <label class="check"><input type="checkbox" name="ativo" value="1" {% if not e or e.ativo %}checked{% endif %}> Visível no site</label>
+        <label class="check"><input type="checkbox" name="destaque" value="1" {% if e and e.destaque %}checked{% endif %}> Destaque na página inicial</label>
+      </div>
+    </div>
+  </fieldset>
+  <div class="acoes"><button class="btn" type="submit">Salvar</button><a class="btn btn--texto" href="{{ url_for('admin.experiencias') }}">Cancelar</a></div>
+</form>
+{% endblock %}

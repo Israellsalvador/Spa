@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block titulo %}Contato{% endblock %}
+{% block capa_class %}sobre-capa{% endblock %}
+{% block conteudo %}
+<section class="cabeca">
+  <div class="cabeca__texto">
+    <span class="eyebrow">Contato</span>
+    <h1 class="titulo">Fale com a <em>Fonte Serena</em></h1>
+    <p class="lead">{{ horario_texto() }}, no horário de Brasília. Respondemos pelo WhatsApp durante o atendimento.</p>
+  </div>
+  {{ m.foto(url_for('static', filename='img/fotos/jardim.jpg'), alt='Jardim interno da Fonte Serena', eager=True) }}
+</section>
+<section class="pagina">
+  <div class="container">
+
+    <div class="contato-cards">
+      {% if wa_link %}
+      <div class="contato-card">
+        <div class="icone">{{ m.icone('whatsapp') }}</div>
+        <h2 class="titulo-p">WhatsApp</h2>
+        <div class="contato-card__corpo"><strong>{{ S.whatsapp }}</strong><span class="muted">Dúvidas, remarcações e ajuda com a sua reserva.</span></div>
+        <a class="btn" href="{{ wa_link }}" target="_blank" rel="noopener">Abrir conversa</a>
+      </div>
+      {% endif %}
+      {% if S.endereco %}
+      <div class="contato-card">
+        <div class="icone">{{ m.icone('pino') }}</div>
+        <h2 class="titulo-p">Endereço</h2>
+        <div class="contato-card__corpo"><strong>{{ S.endereco }}</strong><span class="muted">{{ S.cidade }}</span>{% if S.referencia %}<span class="muted">{{ S.referencia }}</span>{% endif %}</div>
+        <a class="btn btn--contorno" href="{{ mapa_link() }}" target="_blank" rel="noopener">Como chegar</a>
+      </div>
+      {% endif %}
+      <div class="contato-card">
+        <div class="icone">{{ m.icone('relogio') }}</div>
+        <h2 class="titulo-p">Horários</h2>
+        <div class="contato-card__corpo">
+          {% for linha in horario_linhas() %}<div class="linha-hora"><span>{{ linha[0] }}</span><strong>{{ linha[1] }}</strong></div>{% endfor %}
+          <span class="muted pequeno" style="padding-top:6px">O último atendimento começa às {{ hora_fmt(S.ultimo_inicio) }}.</span>
+        </div>
+        <a class="btn btn--contorno" href="{{ url_for('reservas.agendar') }}">Ver horários livres</a>
+      </div>
+      {% if ig_link %}
+      <div class="contato-card">
+        <div class="icone">{{ m.icone('instagram') }}</div>
+        <h2 class="titulo-p">Instagram</h2>
+        <div class="contato-card__corpo"><strong>{{ S.instagram }}</strong><span class="muted">Novidades e bastidores do espaço.</span></div>
+        <a class="btn btn--contorno" href="{{ ig_link }}" target="_blank" rel="noopener">Ver perfil</a>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if S.endereco %}
+    <div class="mapa-grande">
+      <iframe class="mapa" style="height:100%" title="Mapa até a Fonte Serena" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q={{ (S.endereco ~ ', ' ~ S.cidade)|urlencode }}&output=embed"></iframe>
+    </div>
+    {% endif %}
+
+    <div class="caixa" id="privacidade" style="margin-top:24px">
+      {{ m.icone('escudo') }}
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <strong>Seus dados pessoais</strong>
+        <span class="muted">{% if S.email_privacidade %}Para pedir acesso, correção ou exclusão dos seus dados, escreva para <a href="mailto:{{ S.email_privacidade }}">{{ S.email_privacidade }}</a>.{% else %}Para pedir acesso, correção ou exclusão dos seus dados, fale com a gente pelos canais acima.{% endif %}
+        Não pedimos informações de saúde pelo site — se quiser compartilhar algo com a profissional, isso é feito no atendimento, com o seu consentimento.</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
